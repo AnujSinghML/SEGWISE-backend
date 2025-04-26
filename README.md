@@ -12,7 +12,7 @@ A robust backend system that functions as a reliable webhook delivery service. I
 
 1. Clone the repository:
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/AnujSinghML/SEGWISE-backend.git
    cd webhook-delivery-service
    ```
 
@@ -73,7 +73,7 @@ This webhook delivery service is designed with the following components:
 
 # Webhook Service API Guide
 
-## Try it in Your Browser! 🚀
+## Try it in Your Browser! 
 
 The fastest way to explore this API is through our interactive documentation:
 
@@ -85,7 +85,7 @@ This Swagger UI lets you test all endpoints directly without writing a line of c
 
 ## Setting Up Webhook Subscriptions
 
-### Create a new subscription with event filtering
+### Create a new subscription with event filtering and send your own secret key (used in payload verification)
 
 ```bash
 curl -X POST "http://localhost:8000/subscriptions/" \
@@ -97,7 +97,8 @@ curl -X POST "http://localhost:8000/subscriptions/" \
   }'
 ```
 
-The `event_types` array lets you specify exactly which events this subscription should receive. This subscription will only receive webhooks for the "order.created" and "payment.successful" events.
+The `event_types` array lets you specify exactly which events this subscription should receive.
+The `secret_key` here can be set to `null` if you do not want verification.
 
 The API will return a subscription ID - you'll need this for the next steps!
 
@@ -119,7 +120,7 @@ curl -X PATCH "http://localhost:8000/subscriptions/{subscription_id}" \
   }'
 ```
 
-## Event Type Filtering ✅
+## Event Type Filtering 
 
 One of the key features implemented is intelligent event type filtering:
 
@@ -129,13 +130,13 @@ One of the key features implemented is intelligent event type filtering:
 
 This prevents subscribers from receiving irrelevant events and reduces unnecessary traffic.
 
-## Webhook Signature Verification Made Easy ✨
+## Webhook Signature Verification Made Easy 
 
 The most impressive part of this implementation is the secure webhook signature verification. Let me show you how it works:
 
 ### 1. Generate a Signature with Our Helper Tool
 
-We've made security easy with a built-in signature generator:
+We've made security easy with a built-in signature generator:(make sure to use same secret-key as before)
 
 ```bash
 curl -X POST "http://localhost:8000/tools/signature-generator" \
@@ -153,6 +154,7 @@ curl -X POST "http://localhost:8000/tools/signature-generator" \
 ```
 
 The tool will give you the exact signature header you need - no cryptography knowledge required!
+(although you can find implementation related info further in the documentation about our utils.py)
 
 ### 2. Send a Signed Webhook with Event Type
 
