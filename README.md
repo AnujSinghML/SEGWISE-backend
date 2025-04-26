@@ -214,16 +214,44 @@ For a quick demonstration of the full system:
 I've implemented industry-standard security practices while keeping the API intuitive and developer-friendly. The signature verification follows the same patterns used by GitHub, Stripe, and other major platforms, while the event filtering system provides an efficient way to route only relevant events to subscribers.
 
 
+## Deployment Components
 
-## Deployment
+- **Celery Worker** (background task processor)
+  - **Render**: Basic-256 MB background worker at \$6/month. Free plan is a 30‑day trial only.
+  - Must run on a persistent host—serverless/free dynos will suspend idle workers.
 
-This service is deployed on TBA.
-- Live API URL: https://webhook-delivery-service.TBA
-(celery is a webservice which needs to be continuously hosted --> not free)
+- **Redis Broker & Cache**
+  - **Redis Cloud Essentials**: Free 30 MB plan (30 connections, ~5 GB/mo bandwidth). Suitable for development; consider the \$5/mo 1 GB tier for heavier loads.
 
-### Estimated Monthly Costs
+- **PostgreSQL Database**
+  - **Neon Cloud Free Plan**: 0.5 GB storage, ~190 compute hours/mo, auto‑scale‑to‑zero. Ideal for prototyping but capped beyond free limits.
 
-For a deployment handling 5000 webhooks per day with an average of 1.2 delivery attempts per webhook:
+- **Virtual Machine Alternative**
+  - **AWS EC2 t3.micro**: AWS Free Tier covers 750 hr/mo for 12 months. [To Be Added]
+
+## Cost Estimate (24×7 Operation)
+
+Assuming 5000 ingested webhooks/day with 1.2 delivery attempts each (≈6 000 attempts/day, 180 000/mo) and ~1 KB payloads (~0.18 GB egress/mo):
+
+- **Render Background Worker**: \$6.00/mo
+- **Redis Cloud Essentials**: \$0.00/mo
+- **Neon Cloud Free Plan**: \$0.00/mo
+
+**Total with Render**: \$6.00 per month
+
+
+## Assumptions
+
+1. **Webhook Volume:** 5 000/day → ~6 000 delivery attempts/day.
+2. **Payload Size:** ~1 KB per request.
+3. **Redis Free Tier:** 30 MB, 30 connections.
+4. **Neon Free Plan:** 0.5 GB storage, 190 compute hours/mo.
+5. **Persistent Workers:** Celery must run on always‑on infrastructure.
+
+*All prices are current as of April 2025.*
+
+---
+
 
 
 
@@ -249,6 +277,7 @@ For a deployment handling 5000 webhooks per day with an average of 1.2 delivery 
 - Pydantic: Data validation
 - httpx: HTTP client
 - Docker & Docker Compose: Containerization
+- Webhook.site : for testing ingestions (payload)
 
 
 ## Credits
