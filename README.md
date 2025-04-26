@@ -2,6 +2,17 @@
 
 A robust backend system that functions as a reliable webhook delivery service. It ingests incoming webhooks, queues them, and attempts delivery to subscribed target URLs, handling failures with retries and providing visibility into the delivery status.
 
+## Table of Contents
+- [Setup & Installation](#setup--installation)
+- [Architecture](#architecture)
+- [Database Schema](#database-schema)
+- [Webhook Service API Guide](#webhook-service-api-guide)
+- [Deployment Components](#deployment-components)
+- [Cost Estimate](#cost-estimate-247-operation)
+- [Features](#features)
+- [Libraries and Tools](#libraries-and-tools)
+- [Credits](#credits)
+
 ## Setup & Installation
 
 ### Prerequisites
@@ -13,7 +24,6 @@ A robust backend system that functions as a reliable webhook delivery service. I
 1. Clone the repository:
    ```bash
    git clone https://github.com/AnujSinghML/SEGWISE-backend.git
-   cd webhook-delivery-service
    ```
 
 2. Start the containers:
@@ -36,7 +46,7 @@ This webhook delivery service is designed with the following components:
 ### Key Design Decisions
 
 - **FastAPI**: Chosen for its high performance, automatic documentation via Swagger UI, and async support
-- *Neon (Cloud PostgreSQL)**: Used for its reliability and ability to handle complex queries for webhook logs
+- **Neon (Cloud PostgreSQL)**: Used for its reliability and ability to handle complex queries for webhook logs
 - **Celery with Redis**: Provides robust task queueing with retry mechanisms
 - **Docker & Docker Compose**: Containerizes all components for easy deployment
 
@@ -71,9 +81,9 @@ This webhook delivery service is designed with the following components:
 - Index on `webhook_logs.created_at` for efficient log retention cleanup
 - Index on `subscriptions.id` for fast subscription lookup
 
-# Webhook Service API Guide
+## Webhook Service API Guide
 
-## Try it in Your Browser! 
+### Try it in Your Browser! 
 
 The fastest way to explore this API is through our interactive documentation:
 
@@ -83,9 +93,9 @@ http://localhost:8000/docs
 
 This Swagger UI lets you test all endpoints directly without writing a line of code. Perfect for a quick demonstration!
 
-## Setting Up Webhook Subscriptions
+### Setting Up Webhook Subscriptions
 
-### Create a new subscription with event filtering and send your own secret key (used in payload verification)
+#### Create a new subscription with event filtering and send your own secret key (used in payload verification)
 
 ```bash
 curl -X POST "http://localhost:8000/subscriptions/" \
@@ -102,7 +112,7 @@ The `secret_key` here can be set to `null` if you do not want verification.
 
 The API will return a subscription ID - you'll need this for the next steps!
 
-### Manage your subscriptions
+#### Manage your subscriptions
 
 ```bash
 # Get all subscriptions
@@ -120,7 +130,7 @@ curl -X PATCH "http://localhost:8000/subscriptions/{subscription_id}" \
   }'
 ```
 
-## Event Type Filtering 
+### Event Type Filtering 
 
 One of the key features implemented is intelligent event type filtering:
 
@@ -130,13 +140,13 @@ One of the key features implemented is intelligent event type filtering:
 
 This prevents subscribers from receiving irrelevant events and reduces unnecessary traffic.
 
-## Webhook Signature Verification Made Easy 
+### Webhook Signature Verification Made Easy 
 
 The most impressive part of this implementation is the secure webhook signature verification. Let me show you how it works:
 
-### 1. Generate a Signature with Our Helper Tool
+#### 1. Generate a Signature with Our Helper Tool
 
-We've made security easy with a built-in signature generator:(make sure to use same secret-key as before)
+We've made security easy with a built-in signature generator (make sure to use same secret-key as before):
 
 ```bash
 curl -X POST "http://localhost:8000/tools/signature-generator" \
@@ -156,7 +166,7 @@ curl -X POST "http://localhost:8000/tools/signature-generator" \
 The tool will give you the exact signature header you need - no cryptography knowledge required!
 (although you can find implementation related info further in the documentation about our utils.py)
 
-### 2. Send a Signed Webhook with Event Type
+#### 2. Send a Signed Webhook with Event Type
 
 Using the signature from the previous step:
 
@@ -180,7 +190,7 @@ The system will:
 - Check if the subscription is interested in the "order.created" event type
 - Only deliver the webhook if both conditions are met
 
-## Utility Functions
+### Utility Functions
 
 The implementation includes robust utility functions in the `utils.py` file:
 
@@ -190,7 +200,7 @@ The implementation includes robust utility functions in the `utils.py` file:
 
 These utilities follow industry best practices for webhook security and event filtering.
 
-## Security Features Implemented
+### Security Features Implemented
 
 This webhook service includes:
 
@@ -200,7 +210,7 @@ This webhook service includes:
 - Comprehensive delivery logs
 - Automatic retry logic
 
-## Testing the Complete Flow
+### Testing the Complete Flow
 
 For a quick demonstration of the full system:
 
@@ -213,25 +223,24 @@ For a quick demonstration of the full system:
 
 I've implemented industry-standard security practices while keeping the API intuitive and developer-friendly. The signature verification follows the same patterns used by GitHub, Stripe, and other major platforms, while the event filtering system provides an efficient way to route only relevant events to subscribers.
 
-
 ## Deployment Components
 
 - **Celery Worker** (background task processor)
-  - **Render**: Basic-256 MB background worker at \$6/month. Free plan is a 30‑day trial only.
+  - **Render**: Basic-256 MB background worker at \$6/month. Free plan is a 30‑day trial only.
   - Must run on a persistent host—serverless/free dynos will suspend idle workers.
 
 - **Redis Broker & Cache**
-  - **Redis Cloud Essentials**: Free 30 MB plan (30 connections, ~5 GB/mo bandwidth). Suitable for development; consider the \$5/mo 1 GB tier for heavier loads.
+  - **Redis Cloud Essentials**: Free 30 MB plan (30 connections, ~5 GB/mo bandwidth). Suitable for development; consider the \$5/mo 1 GB tier for heavier loads.
 
 - **PostgreSQL Database**
-  - **Neon Cloud Free Plan**: 0.5 GB storage, ~190 compute hours/mo, auto‑scale‑to‑zero. Ideal for prototyping but capped beyond free limits.
+  - **Neon Cloud Free Plan**: 0.5 GB storage, ~190 compute hours/mo, auto‑scale‑to‑zero. Ideal for prototyping but capped beyond free limits.
 
 - **Virtual Machine Alternative**
-  - **AWS EC2 t3.micro**: AWS Free Tier covers 750 hr/mo for 12 months. [To Be Added]
+  - **AWS EC2 t3.micro**: AWS Free Tier covers 750 hr/mo for 12 months.
 
 ## Cost Estimate (24×7 Operation)
 
-Assuming 5000 ingested webhooks/day with 1.2 delivery attempts each (≈6 000 attempts/day, 180 000/mo) and ~1 KB payloads (~0.18 GB egress/mo):
+Assuming 5000 ingested webhooks/day with 1.2 delivery attempts each (≈6,000 attempts/day, 180,000/mo) and ~1 KB payloads (~0.18 GB egress/mo):
 
 - **Render Background Worker**: \$6.00/mo
 - **Redis Cloud Essentials**: \$0.00/mo
@@ -239,21 +248,15 @@ Assuming 5000 ingested webhooks/day with 1.2 delivery attempts each (≈6 000 
 
 **Total with Render**: \$6.00 per month
 
+### Assumptions
 
-## Assumptions
-
-1. **Webhook Volume:** 5 000/day → ~6 000 delivery attempts/day.
-2. **Payload Size:** ~1 KB per request.
-3. **Redis Free Tier:** 30 MB, 30 connections.
-4. **Neon Free Plan:** 0.5 GB storage, 190 compute hours/mo.
+1. **Webhook Volume:** 5,000/day → ~6,000 delivery attempts/day.
+2. **Payload Size:** ~1 KB per request.
+3. **Redis Free Tier:** 30 MB, 30 connections.
+4. **Neon Free Plan:** 0.5 GB storage, 190 compute hours/mo.
 5. **Persistent Workers:** Celery must run on always‑on infrastructure.
 
-*All prices are current as of April 2025.*
-
----
-
-
-
+*All prices are current as of April 2025.*
 
 ## Features
 
@@ -265,7 +268,7 @@ Assuming 5000 ingested webhooks/day with 1.2 delivery attempts each (≈6 000 
 ✅ Log Retention Policy  
 ✅ Status/Analytics Endpoints  
 ✅ Caching for Performance Optimization  
-✅ Payload Signature Verification (Bonus)  [using SHA-256]
+✅ Payload Signature Verification (Bonus) [using SHA-256]  
 ✅ Event Type Filtering (Bonus)  
 
 ## Libraries and Tools
@@ -277,8 +280,7 @@ Assuming 5000 ingested webhooks/day with 1.2 delivery attempts each (≈6 000 
 - Pydantic: Data validation
 - httpx: HTTP client
 - Docker & Docker Compose: Containerization
-- Webhook.site : for testing ingestions (payload)
-
+- Webhook.site: For testing ingestions (payload)
 
 ## Credits
 
