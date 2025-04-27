@@ -1,4 +1,5 @@
 # Webhook Delivery Service
+Link : [https://bit.ly/segwise_anujsingh](https://bit.ly/segwise_anujsingh)
 
 A robust backend system that functions as a reliable webhook delivery service. It ingests incoming webhooks, queues them, and attempts delivery to subscribed target URLs, handling failures with retries and providing visibility into the delivery status.
 
@@ -26,12 +27,12 @@ A robust backend system that functions as a reliable webhook delivery service. I
    git clone https://github.com/AnujSinghML/SEGWISE-backend.git
    ```
 
-2. Start the containers:
+2. Start the containers: (make sure you are in correct directory for composing the docker image : cd SEGWISE-backend)
    ```bash
-   docker-compose up -d
+   docker-compose up --build -d
    ```
 
-3. Access the API documentation at http://localhost:8000/docs
+3. Access the website at http://localhost:8000/docs in your local machine.
 
 ## Architecture
 
@@ -226,6 +227,11 @@ I've implemented industry-standard security practices while keeping the API intu
 
 ## Deployment Components
 
+
+### **Virtual Machine Alternative**
+  - **AWS EC2 t3.micro**: AWS Free Tier covers 750 hr/mo for 12 months. So that is what I did : [https://bit.ly/segwise_anujsingh](https://bit.ly/segwise_anujsingh)
+
+### Render Option (paid for celery)
 - **Celery Worker** (background task processor)
   - **Render**: Basic-256 MB background worker at \$6/month. Free plan is a 30‑day trial only.
   - Must run on a persistent host—serverless/free dynos will suspend idle workers.
@@ -235,9 +241,6 @@ I've implemented industry-standard security practices while keeping the API intu
 
 - **PostgreSQL Database**
   - **Neon Cloud Free Plan**: 0.5 GB storage, ~190 compute hours/mo, auto‑scale‑to‑zero. Ideal for prototyping but capped beyond free limits.
-
-- **Virtual Machine Alternative**
-  - **AWS EC2 t3.micro**: AWS Free Tier covers 750 hr/mo for 12 months.
 
 ## Cost Estimate (24×7 Operation)
 
