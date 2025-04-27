@@ -3,6 +3,22 @@ Link : [https://bit.ly/segwise_anujsingh](https://bit.ly/segwise_anujsingh)
 
 A robust backend system that functions as a reliable webhook delivery service. It ingests incoming webhooks, queues them, and attempts delivery to subscribed target URLs, handling failures with retries and providing visibility into the delivery status.
 
+> **Note for Recruiters:**
+> 
+> A very, very rare case scenario — but I'm mentioning it anyway, because better safe than sorry!
+> 
+> If you ever encounter a **500: Internal Server Error**, or face some issue connecting to **Redis** during the Docker build, please know it's not due to any problem in the application itself.  
+> It’s because I'm using **free-tier databases**, and well... they sometimes go to sleep!  
+> 
+> Kindly **try again** in such cases.  
+> 
+> - For webhook ingestion, **retry logic** is implemented using **Celery**, so it should handle temporary failures smoothly.  
+> - For CRUD operations, I can only hope the DB stays awake! 😅
+> 
+> As much as free tiers are advertised, we all know they like to nap from time to time. xD
+
+
+
 ## Table of Contents
 - [Setup & Installation](#setup--installation)
 - [Architecture](#architecture)
@@ -85,9 +101,13 @@ This webhook delivery service is designed with the following components:
 ## Webhook Service API Guide
 
 ### Try it in Your Browser! 
+[https://bit.ly/segwise_anujsingh](https://bit.ly/segwise_anujsingh)
 
-The fastest way to explore this API is through our interactive documentation:
-Just clone,build and go to-->
+The fastest way to explore this API is through our interactive documentation!
+
+In case my AWS EC2 instance goes to sleep for xyz reason; can never trust free tiers much..
+
+Just clone,build and go to--> 
 
 ```
 http://localhost:8000/docs
