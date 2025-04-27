@@ -13,7 +13,7 @@ A robust backend system that functions as a reliable webhook delivery service. I
 > Kindly **try again** in such cases.  
 > 
 > - For webhook ingestion, **retry logic** is implemented using **Celery**, so it should handle temporary failures smoothly.  
-> - For CRUD operations, I can only hope the DB stays awake! 😅
+> - For CRUD operations, I can only hope the DB stays awake! 
 > 
 > As much as free tiers are advertised, we all know they like to nap from time to time. xD
 
