@@ -1,31 +1,13 @@
 # Webhook Delivery Service
-Link : [https://bit.ly/segwise_anujsingh](https://bit.ly/segwise_anujsingh)
+Link: [https://bit.ly/segwise_anujsingh](https://bit.ly/segwise_anujsingh)
 
 A robust backend system that functions as a reliable webhook delivery service. It ingests incoming webhooks, queues them, and attempts delivery to subscribed target URLs, handling failures with retries and providing visibility into the delivery status.
-
-> **Note for Recruiters:**
-> 
-> A very, very rare case scenario — but I'm mentioning it anyway, because better safe than sorry!
-> 
-> If you ever encounter a **500: Internal Server Error**, or face some issue connecting to **Redis** during the Docker build, please know it's not due to any problem in the application itself.  
-> It’s because I'm using **free-tier databases**, and well... they sometimes go to sleep!  
-> 
-> Kindly **try again** in such cases.  
-> 
-> - For webhook ingestion, **retry logic** is implemented using **Celery**, so it should handle temporary failures smoothly.  
-> - For CRUD operations, I can only hope the DB stays awake! 
-> 
-> As much as free tiers are advertised, we all know they like to nap from time to time. xD
-
-
 
 ## Table of Contents
 - [Setup & Installation](#setup--installation)
 - [Architecture](#architecture)
 - [Database Schema](#database-schema)
 - [Webhook Service API Guide](#webhook-service-api-guide)
-- [Deployment Components](#deployment-components)
-- [Cost Estimate](#cost-estimate-247-operation)
 - [Features](#features)
 - [Libraries and Tools](#libraries-and-tools)
 - [Credits](#credits)
@@ -43,29 +25,32 @@ A robust backend system that functions as a reliable webhook delivery service. I
    git clone https://github.com/AnujSinghML/SEGWISE-backend.git
    ```
 
-2. Start the containers: (make sure you are in correct directory for composing the docker image : cd SEGWISE-backend)
+2. Start the containers:
    ```bash
    docker-compose up --build -d
    ```
 
-3. Access the website at http://localhost:8000/docs in your local machine.
+3. Access the API documentation at http://localhost:8000/docs
+
+### Live Demo
+You can also try the live demo at [https://bit.ly/segwise_anujsingh](https://bit.ly/segwise_anujsingh)
 
 ## Architecture
 
 This webhook delivery service is designed with the following components:
 
 - **FastAPI REST API**: Provides endpoints for subscription management, webhook ingestion, and status checking
-- **Neon (PostgreSQL) Database**: Stores subscription data and webhook delivery logs
-- **Redis**: Used for caching subscription details and as a message broker for Celery
+- **PostgreSQL Database**: Stores subscription data and webhook delivery logs (running in Docker)
+- **Redis**: Used for caching subscription details and as a message broker for Celery (running in Docker)
 - **Celery Workers**: Processes webhook delivery tasks asynchronously with retry capabilities
 - **Celery Beat**: Schedules periodic tasks such as log cleanup
 
 ### Key Design Decisions
 
 - **FastAPI**: Chosen for its high performance, automatic documentation via Swagger UI, and async support
-- **Neon (Cloud PostgreSQL)**: Used for its reliability and ability to handle complex queries for webhook logs
+- **PostgreSQL**: Used for its reliability and ability to handle complex queries for webhook logs
 - **Celery with Redis**: Provides robust task queueing with retry mechanisms
-- **Docker & Docker Compose**: Containerizes all components for easy deployment
+- **Docker & Docker Compose**: Containerizes all components for easy deployment and local development
 
 ## Database Schema
 
@@ -100,18 +85,9 @@ This webhook delivery service is designed with the following components:
 
 ## Webhook Service API Guide
 
-### Try it in Your Browser! 
-[https://bit.ly/segwise_anujsingh](https://bit.ly/segwise_anujsingh)
+### Interactive API Documentation
 
-The fastest way to explore this API is through our interactive documentation!
-
-In case my AWS EC2 instance goes to sleep for xyz reason; can never trust free tiers much..
-
-Just clone,build and go to--> 
-
-```
-http://localhost:8000/docs
-```
+The fastest way to explore this API is through our interactive documentation at http://localhost:8000/docs
 
 This Swagger UI lets you test all endpoints directly without writing a line of code. Perfect for a quick demonstration!
 
@@ -186,7 +162,6 @@ curl -X POST "http://localhost:8000/tools/signature-generator" \
 ```
 
 The tool will give you the exact signature header you need - no cryptography knowledge required!
-(although you can find implementation related info further in the documentation about our utils.py)
 
 #### 2. Send a Signed Webhook with Event Type
 
@@ -212,16 +187,6 @@ The system will:
 - Check if the subscription is interested in the "order.created" event type
 - Only deliver the webhook if both conditions are met
 
-### Utility Functions
-
-The implementation includes robust utility functions in the `utils.py` file:
-
-- `generate_hmac_signature()`: Creates HMAC-SHA256 signatures for webhook payloads
-- `verify_signature()`: Securely compares computed signatures with provided ones
-- Event type parsing and filtering logic
-
-These utilities follow industry best practices for webhook security and event filtering.
-
 ### Security Features Implemented
 
 This webhook service includes:
@@ -243,45 +208,6 @@ For a quick demonstration of the full system:
 5. Try an invalid signature to confirm security works
 6. Check the delivery logs to see successful processing
 
-I've implemented industry-standard security practices while keeping the API intuitive and developer-friendly. The signature verification follows the same patterns used by GitHub, Stripe, and other major platforms, while the event filtering system provides an efficient way to route only relevant events to subscribers.
-
-## Deployment Components
-
-
-### **Virtual Machine Alternative**
-  - **AWS EC2 t3.micro**: AWS Free Tier covers 750 hr/mo for 12 months. So that is what I did : [https://bit.ly/segwise_anujsingh](https://bit.ly/segwise_anujsingh)
-
-### Render Option (paid for celery)
-- **Celery Worker** (background task processor)
-  - **Render**: Basic-256 MB background worker at \$6/month. Free plan is a 30‑day trial only.
-  - Must run on a persistent host—serverless/free dynos will suspend idle workers.
-
-- **Redis Broker & Cache**
-  - **Redis Cloud Essentials**: Free 30 MB plan (30 connections, ~5 GB/mo bandwidth). Suitable for development; consider the \$5/mo 1 GB tier for heavier loads.
-
-- **PostgreSQL Database**
-  - **Neon Cloud Free Plan**: 0.5 GB storage, ~190 compute hours/mo, auto‑scale‑to‑zero. Ideal for prototyping but capped beyond free limits.
-
-## Cost Estimate (24×7 Operation)
-
-Assuming 5000 ingested webhooks/day with 1.2 delivery attempts each (≈6,000 attempts/day, 180,000/mo) and ~1 KB payloads (~0.18 GB egress/mo):
-
-- **Render Background Worker**: \$6.00/mo
-- **Redis Cloud Essentials**: \$0.00/mo
-- **Neon Cloud Free Plan**: \$0.00/mo
-
-**Total with Render**: \$6.00 per month
-
-### Assumptions
-
-1. **Webhook Volume:** 5,000/day → ~6,000 delivery attempts/day.
-2. **Payload Size:** ~1 KB per request.
-3. **Redis Free Tier:** 30 MB, 30 connections.
-4. **Neon Free Plan:** 0.5 GB storage, 190 compute hours/mo.
-5. **Persistent Workers:** Celery must run on always‑on infrastructure.
-
-*All prices are current as of April 2025.*
-
 ## Features
 
 ✅ Subscription Management (CRUD operations)  
@@ -297,13 +223,15 @@ Assuming 5000 ingested webhooks/day with 1.2 delivery attempts each (≈6,000 at
 
 ## Libraries and Tools
 
-- FastAPI: Web framework
-- SQLAlchemy: ORM for database access
-- Celery: Task queue
-- Redis: Cache and message broker
-- Pydantic: Data validation
+- FastAPI: High-performance web framework
+- SQLAlchemy: SQL toolkit and ORM
+- Celery: Distributed task queue
+- Redis: In-memory data store and message broker
+- PostgreSQL: Robust relational database
+- Docker & Docker Compose: Containerization and orchestration
+- Alembic: Database migration tool
+- Pydantic: Data validation and settings management
 - httpx: HTTP client
-- Docker & Docker Compose: Containerization
 - Webhook.site: For testing ingestions (payload)
 
 ## Credits
